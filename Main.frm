@@ -1,38 +1,51 @@
 VERSION 5.00
-Begin VB.Form Form1 
+Begin VB.Form Main 
    Caption         =   "Form1"
    ClientHeight    =   10380
-   ClientLeft      =   60
-   ClientTop       =   450
+   ClientLeft      =   4365
+   ClientTop       =   2280
    ClientWidth     =   14415
    LinkTopic       =   "Form1"
    ScaleHeight     =   692
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   961
-   StartUpPosition =   3  'Windows Default
-   Begin VB.CommandButton Command3 
-      Caption         =   "Command3"
-      Height          =   615
-      Left            =   5040
-      TabIndex        =   2
-      Top             =   2640
-      Width           =   2415
+   Begin VB.Timer tmrAi 
+      Interval        =   500
+      Left            =   480
+      Top             =   4560
    End
-   Begin VB.CommandButton Command2 
-      Caption         =   "Command2"
-      Height          =   615
-      Left            =   5040
-      TabIndex        =   1
-      Top             =   1800
-      Width           =   2175
+   Begin VB.Shape shpPlayer 
+      FillColor       =   &H000000FF&
+      FillStyle       =   0  'Solid
+      Height          =   300
+      Index           =   1
+      Left            =   3960
+      Shape           =   3  'Circle
+      Top             =   5040
+      Visible         =   0   'False
+      Width           =   300
    End
-   Begin VB.CommandButton Command1 
-      Caption         =   "Command1"
-      Height          =   735
-      Left            =   5160
-      TabIndex        =   0
-      Top             =   840
-      Width           =   2415
+   Begin VB.Shape shpTile 
+      FillColor       =   &H0000C000&
+      FillStyle       =   0  'Solid
+      Height          =   750
+      Index           =   0
+      Left            =   480
+      Shape           =   1  'Square
+      Top             =   960
+      Visible         =   0   'False
+      Width           =   750
+   End
+   Begin VB.Shape shpPlayer 
+      FillColor       =   &H00FFFF80&
+      FillStyle       =   0  'Solid
+      Height          =   300
+      Index           =   0
+      Left            =   4320
+      Shape           =   3  'Circle
+      Top             =   5040
+      Visible         =   0   'False
+      Width           =   300
    End
    Begin VB.Image imgCube 
       Height          =   750
@@ -44,112 +57,94 @@ Begin VB.Form Form1
       Visible         =   0   'False
       Width           =   750
    End
-   Begin VB.Shape shpTile 
-      FillColor       =   &H0000C000&
-      FillStyle       =   0  'Solid
-      Height          =   750
-      Index           =   0
-      Left            =   480
-      Top             =   960
-      Visible         =   0   'False
-      Width           =   750
-   End
 End
-Attribute VB_Name = "Form1"
+Attribute VB_Name = "Main"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Type Tile
-    x As Integer
-    y As Integer
-    kind As Integer
-    passable As Boolean
-End Type
-Dim FlatMap(6, 6) As Integer
 
-Dim Map(6, 6) As Tile
-
-Private Sub Command1_Click()
-Call DrawIso("ISO")
-End Sub
-
-Private Sub Command2_Click()
-Call DrawIso("Flat")
-End Sub
-
-Private Sub Command3_Click()
-Dim counter As Integer
-counter = 1
-For x = 0 To 6
-    For y = 0 To 6
-        counter = counter + 1
-        Unload imgCube(counter)
-        Unload shpTile(counter)
-    Next y
-Next x
+Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
+If KeyCode = vbKeyLeft Then
+    If curx(0) > 0 Then
+        Map(curx(0), cury(0)).used = False
+        curx(0) = curx(0) - 1
+        Map(curx(0), cury(0)).used = True
+    End If
+ElseIf KeyCode = vbKeyRight Then
+    If curx(0) < 6 Then
+        Map(curx(0), cury(0)).used = False
+        curx(0) = curx(0) + 1
+        Map(curx(0), cury(0)).used = True
+    End If
+ElseIf KeyCode = vbKeyDown Then
+    If cury(0) < 6 Then
+        Map(curx(0), cury(0)).used = False
+        cury(0) = cury(0) + 1
+        Map(curx(0), cury(0)).used = True
+    End If
+ElseIf KeyCode = vbKeyUp Then
+    If cury(0) > 0 Then
+        Map(curx(0), cury(0)).used = False
+        cury(0) = cury(0) - 1
+        Map(curx(0), cury(0)).used = True
+    End If
+End If
+shpPlayer(0).Left = Map(curx(0), cury(0)).X + 15
+shpPlayer(0).Top = Map(curx(0), cury(0)).Y
+shpPlayer(0).Visible = True
 End Sub
 
 Private Sub Form_Load()
-For x = 0 To 6
-    For y = 0 To 6
-        If x = 0 Or x = 6 Or y = 0 Or y = 6 Then
-            FlatMap(x, y) = 1
+For X = 0 To 6
+    For Y = 0 To 6
+        If X = 0 Or X = 6 Or Y = 0 Or Y = 6 Then
+            FlatMap(X, Y) = 1
         Else
-            FlatMap(x, y) = 0
+            FlatMap(X, Y) = 0
         End If
-        Map(x, y).x = 50 * x
-        Map(x, y).y = 50 * y
-        Map(x, y).kind = FlatMap(x, y)
-        Map(x, y).passable = True
-    Next y
-Next x
-
+        Map(X, Y).X = 50 * X + 350
+        Map(X, Y).Y = 50 * Y
+        Map(X, Y).kind = FlatMap(X, Y)
+        Map(X, Y).passable = True
+    Next Y
+Next X
+curx(0) = 2
+cury(0) = 2
+curx(1) = 5
+cury(1) = 3
+Map(2, 2).used = True
+Map(5, 3).used = True
+Call DrawIso("ISO")
 End Sub
 
-Private Function Flat2Iso(xTile As Tile) As Tile
-Dim cartx As Integer
-Dim carty As Integer
-cartx = xTile.x
-carty = xTile.y
-xTile.x = cartx - carty
-xTile.y = (cartx + carty) / 2
-Flat2Iso = xTile
-End Function
-Private Function Iso2Flat(xTile As Tile) As Tile
-Dim cartx As Integer
-Dim carty As Integer
-cartx = xTile.x
-carty = xTile.y
-xTile.x = (2 * cartx + carty) / 2
-xTile.y = (2 * cartx - carty) / 2
-Iso2Flat = xTile
-End Function
 
-Private Sub DrawIso(ByVal whichType As String)
-Dim counter As Integer
-counter = 1
-For x = 0 To 6
-    For y = 0 To 6
-        counter = counter + 1
-        Load shpTile(counter)
-        Load imgCube(counter)
-        If Map(x, y).kind = 0 Then
-            shpTile(counter).FillColor = vbGreen
-        ElseIf Map(x, y).kind = 1 Then
-            shpTile(counter).FillColor = vbRed
-        End If
-        If whichType = "ISO" Then
-            imgCube(counter).Left = Flat2Iso(Map(x, y)).x
-            imgCube(counter).Top = Flat2Iso(Map(x, y)).y
-        Else
-            imgCube(counter).Left = Iso2Flat(Map(x, y)).x
-            imgCube(counter).Top = Iso2Flat(Map(x, y)).y
-        End If
-        imgCube(counter).Visible = True
-        'shpTile(counter).Left = Map(x, y).x
-        'shpTile(counter).Top = Map(x, y).y
-        'shpTile(counter).Visible = True
-    Next y
-Next x
+
+
+Private Sub imgCube_Click(Index As Integer)
+Unload imgCube(Index)
+End Sub
+
+Private Sub tmrAi_Timer()
+Dim temp As Integer
+temp = Int(Rnd() * 2)
+Map(curx(1), cury(1)).used = False
+
+If temp = 0 Then
+    If curx(1) > curx(0) Then
+        curx(1) = curx(1) - 1
+    Else
+        curx(1) = curx(1) + 1
+    End If
+Else
+    If cury(1) > cury(0) Then
+        cury(1) = cury(1) - 1
+    Else
+        cury(1) = cury(1) + 1
+    End If
+End If
+Map(curx(1), cury(1)).used = True
+shpPlayer(1).Left = Map(curx(1), cury(1)).X + 15
+shpPlayer(1).Top = Map(curx(1), cury(1)).Y
+shpPlayer(1).Visible = True
 End Sub
