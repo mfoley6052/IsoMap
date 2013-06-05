@@ -10,9 +10,27 @@ Begin VB.Form Main
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   961
    Begin VB.Timer tmrAi 
-      Interval        =   500
+      Interval        =   750
       Left            =   480
       Top             =   4560
+   End
+   Begin VB.Label lblScore 
+      Alignment       =   1  'Right Justify
+      Caption         =   "00000000"
+      BeginProperty Font 
+         Name            =   "Terminal"
+         Size            =   13.5
+         Charset         =   255
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   375
+      Left            =   12960
+      TabIndex        =   0
+      Top             =   120
+      Width           =   1335
    End
    Begin VB.Shape shpPlayer 
       FillColor       =   &H000000FF&
@@ -93,6 +111,7 @@ End If
 shpPlayer(0).Left = Map(curx(0), cury(0)).X + 15
 shpPlayer(0).Top = Map(curx(0), cury(0)).Y
 shpPlayer(0).Visible = True
+lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
 End Sub
 
 Private Sub Form_Load()
@@ -118,9 +137,6 @@ Map(5, 3).used = True
 Call DrawIso("ISO")
 End Sub
 
-
-
-
 Private Sub imgCube_Click(Index As Integer)
 Unload imgCube(Index)
 End Sub
@@ -131,13 +147,13 @@ temp = Int(Rnd() * 2)
 Map(curx(1), cury(1)).used = False
 
 If temp = 0 Then
-    If curx(1) > curx(0) Then
+    If curx(1) >= curx(0) Then
         curx(1) = curx(1) - 1
     Else
         curx(1) = curx(1) + 1
     End If
 Else
-    If cury(1) > cury(0) Then
+    If cury(1) >= cury(0) Then
         cury(1) = cury(1) - 1
     Else
         cury(1) = cury(1) + 1
