@@ -85,49 +85,61 @@ Attribute VB_Exposed = False
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
 If KeyCode = vbKeyLeft Then
     If curx(0) > 0 Then
-        Map(curx(0), cury(0)).used = False
-        curx(0) = curx(0) - 1
-        Map(curx(0), cury(0)).used = True
+        If Map(curx(0) - 1, cury(0)).passable Then
+            lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
+            Map(curx(0), cury(0)).used = False
+            curx(0) = curx(0) - 1
+            Map(curx(0), cury(0)).used = True
+        End If
     End If
 ElseIf KeyCode = vbKeyRight Then
     If curx(0) < 6 Then
-        Map(curx(0), cury(0)).used = False
-        curx(0) = curx(0) + 1
-        Map(curx(0), cury(0)).used = True
+        If Map(curx(0) + 1, cury(0)).passable Then
+            lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
+            Map(curx(0), cury(0)).used = False
+            curx(0) = curx(0) + 1
+            Map(curx(0), cury(0)).used = True
+        End If
     End If
 ElseIf KeyCode = vbKeyDown Then
     If cury(0) < 6 Then
-        Map(curx(0), cury(0)).used = False
-        cury(0) = cury(0) + 1
-        Map(curx(0), cury(0)).used = True
+        If Map(curx(0), cury(0) + 1).passable Then
+            lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
+            Map(curx(0), cury(0)).used = False
+            cury(0) = cury(0) + 1
+            Map(curx(0), cury(0)).used = True
+        End If
     End If
 ElseIf KeyCode = vbKeyUp Then
     If cury(0) > 0 Then
-        Map(curx(0), cury(0)).used = False
-        cury(0) = cury(0) - 1
-        Map(curx(0), cury(0)).used = True
+        If Map(curx(0), cury(0) - 1).passable Then
+            lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
+            Map(curx(0), cury(0)).used = False
+            cury(0) = cury(0) - 1
+            Map(curx(0), cury(0)).used = True
+        End If
     End If
 End If
-shpPlayer(0).Left = Map(curx(0), cury(0)).X + 15
-shpPlayer(0).Top = Map(curx(0), cury(0)).Y
+shpPlayer(0).Left = Map(curx(0), cury(0)).x + 15
+shpPlayer(0).Top = Map(curx(0), cury(0)).y
 shpPlayer(0).Visible = True
-lblScore.Caption = Format(Val(lblScore.Caption) + 10, "00000000")
+
 End Sub
 
 Private Sub Form_Load()
-For X = 0 To 6
-    For Y = 0 To 6
-        If X = 0 Or X = 6 Or Y = 0 Or Y = 6 Then
-            FlatMap(X, Y) = 1
+For x = 0 To 6
+    For y = 0 To 6
+        If x = 0 Or x = 6 Or y = 0 Or y = 6 Then
+            FlatMap(x, y) = 1
         Else
-            FlatMap(X, Y) = 0
+            FlatMap(x, y) = 0
         End If
-        Map(X, Y).X = 50 * X + 350
-        Map(X, Y).Y = 50 * Y
-        Map(X, Y).kind = FlatMap(X, Y)
-        Map(X, Y).passable = True
-    Next Y
-Next X
+        Map(x, y).x = 50 * x + 350
+        Map(x, y).y = 50 * y
+        Map(x, y).kind = FlatMap(x, y)
+        Map(x, y).passable = True
+    Next y
+Next x
 curx(0) = 2
 cury(0) = 2
 curx(1) = 5
@@ -137,8 +149,10 @@ Map(5, 3).used = True
 Call DrawIso("ISO")
 End Sub
 
-Private Sub imgCube_Click(Index As Integer)
-Unload imgCube(Index)
+Private Sub imgCube_Click(index As Integer)
+Unload imgCube(index)
+Map(info(index).x, info(index).y).passable = False
+info(index).passable = False
 End Sub
 
 Private Sub tmrAi_Timer()
@@ -148,19 +162,34 @@ Map(curx(1), cury(1)).used = False
 
 If temp = 0 Then
     If curx(1) >= curx(0) Then
-        curx(1) = curx(1) - 1
+        If Map(curx(1) - 1, cury(1)).passable Then
+            curx(1) = curx(1) - 1
+        End If
     Else
-        curx(1) = curx(1) + 1
+        If Map(curx(1) + 1, cury(1)).passable Then
+            curx(1) = curx(1) + 1
+        End If
     End If
 Else
     If cury(1) >= cury(0) Then
-        cury(1) = cury(1) - 1
+        If Map(curx(1), cury(1) - 1).passable Then
+           cury(1) = cury(1) - 1
+        End If
     Else
-        cury(1) = cury(1) + 1
+        If Map(curx(1), cury(1) + 1).passable Then
+            cury(1) = cury(1) + 1
+        End If
     End If
 End If
 Map(curx(1), cury(1)).used = True
-shpPlayer(1).Left = Map(curx(1), cury(1)).X + 15
-shpPlayer(1).Top = Map(curx(1), cury(1)).Y
+shpPlayer(1).Left = Map(curx(1), cury(1)).x + 15
+shpPlayer(1).Top = Map(curx(1), cury(1)).y
 shpPlayer(1).Visible = True
+If curx(0) = curx(1) And cury(0) = cury(1) Then
+    If Val(lblScore.Caption) >= 150 Then
+        lblScore.Caption = Format(Val(lblScore.Caption) - 150, "00000000")
+    Else
+        lblScore.Caption = Format(0, "00000000")
+    End If
+End If
 End Sub
