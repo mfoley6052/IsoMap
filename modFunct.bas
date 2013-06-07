@@ -5,13 +5,22 @@ Public curx(1) As Integer
 Public cury(1) As Integer
 Public info() As Tile
 Public Type Tile
+    tilex As Integer
+    tiley As Integer
     x As Integer
     y As Integer
     kind As Integer
     index As Integer
     used As Boolean
     passable As Boolean
+    G As Integer
+    H As Integer
+    F As Integer
 End Type
+Public tempList() As Tile
+Public openList() As Tile
+Public closedList() As Tile
+Public path() As Tile
 Public Sub DrawIso(ByVal whichType As String)
 Dim counter As Integer
 With Main
@@ -27,8 +36,10 @@ For x = 0 To 6
         Load .shpTile(counter)
         Load .imgCube(counter)
         .imgCube(counter).Visible = True
+        Map(x, y).tilex = x
+        Map(x, y).tiley = y
         If Map(x, y).kind = 0 Then
-            .imgCube(counter).Picture = LoadPicture(App.Path & "/gblock.gif")
+            .imgCube(counter).Picture = LoadPicture(App.path & "/gblock.gif")
             .shpTile(counter).FillColor = vbGreen
             Map(x, y).passable = True
         ElseIf Map(x, y).kind = 1 Then
@@ -49,7 +60,7 @@ For x = 0 To 6
         '.shpTile(counter).Visible = True
     Next y
 Next x
-For x = .shpPlayer.Lbound To .shpPlayer.Ubound
+For x = .shpPlayer.LBound To .shpPlayer.UBound
     .shpPlayer(x).Left = Map(curx(x), cury(x)).x + 15
     .shpPlayer(x).Top = Map(curx(x), cury(x)).y
     .shpPlayer(x).Visible = True
